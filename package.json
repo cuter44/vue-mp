@@ -11,6 +11,8 @@
     "lint": "eslint --ext .js,.vue src"
   },
   "dependencies": {
+    "bootstrap-vue": "^0.16.1",
+    "promise-request": "^0.1.2",
     "vue": "^2.2.6"
   },
   "devDependencies": {
