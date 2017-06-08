@@ -22,13 +22,6 @@
     </div>
     <upload-sheet v-for="(item, index) in batches" :key="item.t" @submitted="appendSheet()">
     </upload-sheet>
-    <div id="bottom-upload" class="fixed-bottom container bg-faded">
-      <div class="row">
-        <div class="col">
-          ipsum
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 

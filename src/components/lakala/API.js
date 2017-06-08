@@ -1,9 +1,8 @@
 import Config from '@/Config';
-import PR from 'promise-request';
 
 export default {
   URLs: {
-    CSVParse: Config.APIServer.cafune + '/lakala/csv-parse.api'
+    CSVParse: Config.APIServer.cafune + '/contract/lakala/csv-parse.api'
   },
   /** Invoking CSVParse API.
    * @return {Promise} 
@@ -15,16 +14,18 @@ export default {
       fr.onerror = reject;
       fr.readAsArrayBuffer(file);
     }).then( (ev) => {
-      var blob = ev.target.result;
-      blob.type = 'text/csv; charset=gbk';
-
+      var blob = new Blob([ev.target.result], {type: 'text/csv; charset=gbk'});
       var fd = new FormData();
       fd.set('data', blob);
-
-      return PR.post({
-        url: this.URLs.CSVParse,
-        formData: fd
-      });
+      
+      return fetch(
+        this.URLs.CSVParse,
+        {
+          method: 'POST',
+          body: fd,
+          credentials: 'include'
+        }
+      );
     });
 
     return(p);

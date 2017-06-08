@@ -2,7 +2,7 @@
   <div class="row mb-2">
     <div class="col">
 
-    <!-- INIT -->
+      <!-- INIT -->
       <div class="card small" v-if="status=='init'">
         <div class="card-header bg-primary text-white">
           上传文件
@@ -20,7 +20,7 @@
         </div>
       </div>
 
-    <!-- PROCESS -->
+      <!-- PROCESS -->
       <div class="card small" v-if="status=='process'">
         <div class="card-header bg-warning text-white">
           正在处理
@@ -30,58 +30,51 @@
         </div>
       </div>
 
-
-    <!-- COMPLETED -->
-      <div class="card" v-if="status=='completed'">
+      <!-- COMPLETED -->
+      <div class="card small" v-if="status=='completed'">
         <div class="card-header bg-success text-white">
           已解析
         </div>
         <div class="card-block">
-          <form class="inline-form">
-            <!--<label for="data" class="col-2">CSV 文件</albel>-->
-            <input name="data" class="form-control" type="file" accept=".csv" placeholder="CSV 文件" >
-            <button class="form-control btn btn-primary" @click="submitCsv">提交</button>
-          </form>
+          <b-table class="table-sm table-striped" :items="payments" :fields="header">
+            <template slot="tmPay" scope="item">
+              {{ new Date(item.value).toLocaleString() }}
+            </template>
+            <template slot="grossPay" scope="item">
+              {{ item.value.toFixed(2) }}
+            </template>
+            <template slot="netPay" scope="item">
+              {{ item.value.toFixed(2) }}
+            </template>
+          </b-table>
         </div>
       </div>
 
-    <!-- PROCESS FAIL -->
+      <!-- PROCESS FAIL -->
       <div class="card small" v-if="status=='process-fail'">
         <div class="card-header bg-danger text-white">
           上传失败
         </div>
         <div class="card-block">
-          总之就是失败了.
+          {{ stDetail }}
         </div>
       </div>
 
-
-    <!-- RETREAT -->
-      <div class="card" v-if="status=='retreat'">
+      <!-- RETREAT -->
+      <div class="card small" v-if="status=='retreat'">
         <div class="card-header">
           正在撤销
         </div>
         <div class="card-block">
-          <form class="inline-form">
-            <!--<label for="data" class="col-2">CSV 文件</albel>-->
-            <input name="data" class="form-control" type="file" accept=".csv" placeholder="CSV 文件" >
-            <button class="form-control btn btn-primary" @click="submitCsv">提交</button>
-          </form>
         </div>
       </div>
 
-
-    <!-- RETREATED -->
+      <!-- RETREATED -->
       <div class="card" v-if="status=='retreated'">
         <div class="card-header bg-faded">
           已撤销
         </div>
         <div class="card-block">
-          <form class="inline-form">
-            <!--<label for="data" class="col-2">CSV 文件</albel>-->
-            <input name="data" class="form-control" type="file" accept=".csv" placeholder="CSV 文件" >
-            <button class="form-control btn btn-primary" @click="submitCsv">提交</button>
-          </form>
         </div>
       </div>
 
@@ -91,13 +84,35 @@
 
 <script>
 import API from './API';
+import bTable from 'bootstrap-vue'
 
 export default {
   data: function () {
     return {
       status: 'init',
       fdCsvUpload: null,
-      stDetail: ''
+      stDetail: '',
+      payments: null,
+      header: {
+        contractId: {
+          label: '订单ID'
+        },
+        tmPay: {
+          label: '时间'
+        },
+        grossPay: {
+          label: '应付'
+        },
+        netPay: {
+          label: '实付'
+        },
+        remoteId0: {
+          label: '远端同步ID'
+        },
+        remoteId1: {
+          label: '本地同步ID'
+        }
+      }
     }
   },
   methods: {
@@ -121,12 +136,23 @@ export default {
       ev && ev.preventDefault();
     },
     completeParse: function (response) {
-      this.$data.status = 'completed';
+      if (!response.ok) {
+        console.log(response);
+        response.json()
+          .then( (j) => { this.failParse(j.msgl10n); })
+          .catch( (e) => { return response.text(); })
+          .then( (s) => { this.failParse(new Error(s)); });
+        return;
+      }
 
-      console.log(response);
+      // else
+      this.$data.status = 'completed';
+      response.json()
+        .then( (j) => { this.$data.payments = j.payments; });
     },
     failParse: function (error) {
       this.$data.status = 'process-fail';
+      this.$data.stDetail = error.message;
 
       console.log(error);
     }
