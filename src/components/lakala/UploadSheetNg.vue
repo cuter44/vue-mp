@@ -36,17 +36,8 @@
           已解析
         </div>
         <div class="card-block">
-          <b-table class="table-sm table-striped" :items="payments" :fields="header">
-            <template slot="tmPay" scope="item">
-              {{ new Date(item.value).toLocaleString() }}
-            </template>
-            <template slot="grossPay" scope="item">
-              {{ item.value.toFixed(2) }}
-            </template>
-            <template slot="netPay" scope="item">
-              {{ item.value.toFixed(2) }}
-            </template>
-          </b-table>
+          <payment-table class="table-sm table-striped" :items="payments">
+          </payment-table>
         </div>
       </div>
 
@@ -84,7 +75,7 @@
 
 <script>
 import API from './API';
-import bTable from 'bootstrap-vue'
+import PaymentTable from '../PaymentTable'
 
 export default {
   data: function () {
@@ -92,30 +83,10 @@ export default {
       status: 'init',
       fdCsvUpload: null,
       stDetail: '',
-      payments: null,
-      header: {
-        contractId: {
-          label: '订单ID'
-        },
-        tmPay: {
-          label: '时间'
-        },
-        grossPay: {
-          label: '应付'
-        },
-        netPay: {
-          label: '实付'
-        },
-        remoteId0: {
-          label: '远端同步ID'
-        },
-        remoteId1: {
-          label: '本地同步ID'
-        }
-      }
+      payments: null
     }
   },
-  component: { bTable },
+  components: { PaymentTable },
   methods: {
     submitCsv: function (ev) {
       if (!this.$data.fdCsvUpload) return;
